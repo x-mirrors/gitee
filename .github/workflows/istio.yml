@@ -1,0 +1,69 @@
+name: istio
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'run action reason'
+        required: false
+        type: string
+        default: 'manually test'
+  schedule:
+  - cron: '5 0 */6 * *'
+  push:
+    branches:
+    - main
+    - dev
+    - bug/**
+    - fix/**
+    - bugfix/**
+    - feature/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  orgs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - github: istio
+          gitee: x-istio
+
+    steps:
+    - name: Cache src repo
+      uses: actions/cache@v3
+      id: cache-src-repo
+      with:
+        path: ${{ github.workspace }}/git-mirrors-cache
+        key: ${{ runner.os }}-${{ matrix.github }}-cache
+        restore-keys: ${{ runner.os }}-${{ matrix.github }}-cache
+
+    - name: Organization ${{ matrix.github }} mirror
+      if: ${{ always() }}
+      uses: x-actions/git-mirrors@main
+      with:
+        src: github/${{ matrix.github }}
+        src_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        dst: gitee/${{ matrix.gitee }}
+        dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+        dst_token: ${{ secrets.GITEE_TOKEN }}
+        account_type: org
+        clone_style: ssh
+        debug: true
+
+    - name: Print cache path
+      continue-on-error: true
+      run: |
+        set -x
+        echo "whoami is `whoami`"
+        dir="${{ github.workspace }}/git-mirrors-cache"
+        if [ -d "${dir}" ]; then
+          sudo chmod a+r -R ${dir}
+          ls -lhart ${dir}
+          tree -L 2 ${dir}
+          du -lh -d 1
+        else
+          echo "empty"
+        fi
