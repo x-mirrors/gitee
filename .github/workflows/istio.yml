@@ -32,13 +32,14 @@ jobs:
           gitee: x-istio
 
     steps:
-    - name: Cache src repo
-      uses: actions/cache@v3
-      id: cache-src-repo
+    # https://github.com/actions/cache/blob/main/restore/README.md#outputs
+    - name: Restore cached repo
+      id: restore-cached-repo
+      uses: actions/cache/restore@v3
       with:
-        path: ${{ github.workspace }}/git-mirrors-cache
+        path: |
+          ${{ github.workspace }}/git-mirrors-cache
         key: ${{ runner.os }}-${{ matrix.github }}-cache
-        restore-keys: ${{ runner.os }}-${{ matrix.github }}-cache
 
     - name: Organization ${{ matrix.github }} mirror
       if: ${{ always() }}
@@ -67,3 +68,12 @@ jobs:
         else
           echo "empty"
         fi
+
+    # https://github.com/actions/cache/blob/main/save/README.md
+    - name: Save repo cache
+      id: save-repo-cache
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          ${{ github.workspace }}/git-mirrors-cache
+        key: ${{ steps.restore-cached-repo.outputs.cache-primary-key }}

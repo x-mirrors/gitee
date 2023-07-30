@@ -89,8 +89,12 @@ class Render(object):
         'target': f'[gitee.com/{dest}](https://gitee.com/{dest})',
         'sync_account': '-',
         'repo_count': self.get_repo_count(src),
-        'status': '',
+        'status': f'[![github.com/{src}](https://github.com/x-mirrors/gitee/actions/workflows/{src}.yml/badge.svg)](https://github.com/x-mirrors/gitee/actions/workflows/{src}.yml)',
       })
+
+      print(f'## {src} Mirror\n')
+      print(f'- sync from https://github.com/{src} by [x-mirrors/gitee](https://github.com/x-mirrors/gitee)')
+      print(f'- 其他同步需求：发送邮件到 `me@xiexianbin.cn` 或在 https://github.com/x-mirrors/gitee/ 提交 `issue`\n')
 
     target_lines = sorted(target_lines, key=lambda x: x['source'])
     for i in target_lines:
