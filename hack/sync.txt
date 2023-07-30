@@ -1,6 +1,4 @@
 # <github group> <gitee group>
 argoproj argoproj
-facebookresearch facebookresearch
 influxdata influxdata
 istio x-istio
-kubernetes x-kubernetes
